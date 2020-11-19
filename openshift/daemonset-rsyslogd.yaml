@@ -21,8 +21,12 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
+          - name: NODEIP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           - name: LOGSERVER
-            value: 'logs.example.com' # Change this to match your environment
+            value: '127.0.0.1' # Change this to match your environment
           - name: SYSLOGD_OPTIONS
             value: '-f /config/rsyslog.conf'
         image: registry.redhat.io/rhel8/rsyslog

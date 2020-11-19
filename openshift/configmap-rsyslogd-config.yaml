@@ -37,6 +37,60 @@ data:
         property(name="msg")
         }
     
+    template(name="ForwardFormat" type="list") {
+        constant(value="<")
+        property(name="pri")
+        constant(value=">")
+        property(name="timestamp" dateFormat="rfc3339")
+        constant(value=" ")
+        property(name="hostname")
+        constant(value=" ")
+        property(name="syslogtag" position.from="1" position.to="32")
+        constant(value="XXX ")
+        property(name="hostname")
+        property(name="msg" spifno1stsp="on" )
+        property(name="msg")
+        }
+
+    template(name="RSYSLOG_DebugFormat" type="list") {
+     constant(value="Debug line with all properties:\nFROMHOST: '")
+     property(name="fromhost")
+     constant(value="', fromhost-ip: '")
+     property(name="fromhost-ip")
+     constant(value="', HOSTNAME: '")
+     property(name="hostname")
+     constant(value="', PRI: '")
+     property(name="pri")
+     constant(value=",\nsyslogtag '")
+     property(name="syslogtag")
+     constant(value="', programname: '")
+     property(name="programname")
+     constant(value="', APP-NAME: '")
+     property(name="app-name")
+     constant(value="', PROCID: '")
+     property(name="procid")
+     constant(value="', MSGID: '")
+     property(name="msgid")
+     constant(value="',\nTIMESTAMP: '")
+     property(name="timereported")
+     constant(value="', STRUCTURED-DATA: '")
+     property(name="structured-data")
+     constant(value="',\nmsg: '")
+     property(name="msg")
+     constant(value="'\nescaped msg: '")
+     property(name="msg" controlcharacters="drop")
+     constant(value="'\ninputname: ")
+     property(name="inputname")
+     constant(value=" rawmsg: '")
+     property(name="rawmsg")
+     constant(value="'\n$!:")
+     property(name="$!")
+     constant(value="\n$.:")
+     property(name="$.")
+     constant(value="\n$/:")
+     property(name="$/")
+     constant(value="\n\n")
+    }
     # Gather Kubernetes Metadata from the filename
     ruleset(name="container_logs")
     {
@@ -46,8 +100,9 @@ data:
         set $.container = field($.pod_namespace_container, "_", 3);
         
         action(type="omfwd"
-            target  = `echo $LOGSERVER`
-            port    = "514"
+            #target  = `echo $LOGSERVER`
+            target  = `echo $NODEIP`
+            port    = "30514"
             protocol= "udp"
             template= "kube-log-forwarding"
             )
@@ -65,9 +120,13 @@ data:
     ruleset(name="to_remote")
     {
         action(type="omfwd"
-            target  = `echo $LOGSERVER`
-            port    = "514"
+            #target  = `echo $LOGSERVER`
+            target  = `echo $NODEIP`
+            port    = "30514"
             protocol= "udp"
+            #template= "RSYSLOG_DebugFormat"
+            #template= "RSYSLOG_TraditionalForwardFormat"
+            template= "ForwardFormat"
             )
     }
     call to_remote
